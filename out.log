@@ -1,0 +1,42 @@
+Testing DataReader...
+Data from Grid:    GridID  LeftLongitude  RightLongitude  UpperLatitude  LowerLatitude
+0       1         -120.5          -119.5           38.5           37.5
+Data from User:    UserID  Longitude  Latitude  Priority
+0       1     -120.0      38.0         1
+Data from Product:    ProductID Category   Name Abbreviation Unit
+0          1     Food  Apple         Appl   Kg
+Data from Warehouse:    WarehouseID  Longitude  Latitude  CoverageRange
+0            1     -120.1      38.1          100.0
+Data from WarehouseProduct:    WarehouseID  ProductID  Stock  MinStock  MaxStock
+0            1          1   1000       500      2000
+Data from Transportation:    TransportID  StartWarehouseID  EndLongitude  EndLatitude  CostTime
+0            1                 1        -119.9         37.9        60
+Data from TransportationProduct:    TransportID  ProductID  Quantity
+0            1          1       100
+Data from Demand:    DemandID   StartEarliestTime  ...       EndLatestTime UserID
+0         1 2023-06-02 08:00:00  ... 2023-06-02 14:00:00      1
+
+[1 rows x 6 columns]
+Data from DemandProduct:    DemandID  ProductID  Quantity
+0         1          1        50
+Testing DataPreprocessor...
+Processed data from Grid:    GridID  LeftLongitude  RightLongitude  UpperLatitude  LowerLatitude
+0     0.0            0.0             0.0            0.0            0.0
+Processed data from User:    UserID  Longitude  Latitude  Priority
+0     0.0        0.0       0.0       0.0
+Processed data from Product:    ProductID Category   Name Abbreviation Unit
+0        0.0     Food  Apple         Appl   Kg
+Processed data from Warehouse:    WarehouseID  Longitude  Latitude  CoverageRange
+0          0.0        0.0       0.0            0.0
+Processed data from WarehouseProduct:    WarehouseID  ProductID  Stock  MinStock  MaxStock
+0          0.0        0.0    0.0       0.0       0.0
+Processed data from Transportation:    TransportID  StartWarehouseID  EndLongitude  EndLatitude  CostTime
+0          0.0               0.0           0.0          0.0       0.0
+Processed data from TransportationProduct:    TransportID  ProductID  Quantity
+0          0.0        0.0       0.0
+Processed data from Demand:    DemandID   StartEarliestTime  ...       EndLatestTime UserID
+0       0.0 2023-06-02 08:00:00  ... 2023-06-02 14:00:00    0.0
+
+[1 rows x 6 columns]
+Processed data from DemandProduct:    DemandID  ProductID  Quantity
+0       0.0        0.0       0.0
