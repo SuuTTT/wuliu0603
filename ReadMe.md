@@ -45,13 +45,60 @@ This module processes the results returned by the solver and outputs or stores t
 ### 6. Update Monitor Module
 Monitors real-time changes in user demand and warehouse inventory and updates the data and model accordingly.
 
+Sure! Here's how you might add a section to your README explaining how to create a table using `create-database.sql` in MySQL.
+
+---
+
+## Database Setup
+
+1. **Open MySQL command line client or MySQL Shell.**
+
+2. **Log in to your MySQL server:**
+
+    ```
+    mysql -u root -p
+    ```
+
+    This command will prompt you for your MySQL password. Replace `root` with your MySQL username if it's not `root`.
+
+3. **Create the database (if it does not already exist):**
+
+    ```sql
+    CREATE DATABASE IF NOT EXISTS your_database_name;
+    ```
+
+    Replace `your_database_name` with the name of your database.
+
+4. **Use the database:**
+
+    ```sql
+    USE your_database_name;
+    ```
+
+5. **Create the tables:**
+
+    To run the SQL script contained in `create-database.sql`, exit the MySQL Shell and navigate to the directory containing the `create-database.sql` file. Then, execute the following command:
+
+    ```
+    mysql -u root -p your_database_name < create-database.sql
+    ```
+
+    This command will prompt you for your MySQL password. Replace `root` with your MySQL username if it's not `root` and `your_database_name` with the name of your database.
+
+
+
+You're all set! The database and necessary tables have been created and are ready to be used by the application.
+
+
+
+Remember to replace `your_database_name` with the actual name of your database.
 ## Getting Started
 
 
 1. **Clone the repository:**
 
    ```
-   git clone 
+   git clone https://github.com/SuuTTT/wuliu0603.git
    ```
 
 2. **Navigate to the project directory:**
