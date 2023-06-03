@@ -45,9 +45,6 @@ This module processes the results returned by the solver and outputs or stores t
 ### 6. Update Monitor Module
 Monitors real-time changes in user demand and warehouse inventory and updates the data and model accordingly.
 
-Sure! Here's how you might add a section to your README explaining how to create a table using `create-database.sql` in MySQL.
-
----
 
 ## Database Setup
 
