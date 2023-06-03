@@ -39,6 +39,58 @@ Finally, please note that the PuLP library in Python allows you to solve optimiz
 
 ## gene
 
+### code explain
+
+在这个问题中，我们使用遗传算法（Genetic Algorithm，GA）进行建模和解决。遗传算法是一种启发式搜索和优化方法，它借鉴了自然界中的进化论和自然选择机制。
+
+### 1. 定义适应度函数
+
+适应度函数是遗传算法的核心，它定义了如何衡量一个解（即一个个体或者一组基因）的质量。在这个问题中，我们定义的适应度函数是这样的：
+
+```python
+def fitness_func(self, ga_instance, solution, solution_idx):
+    function_inputs = numpy.array(list(self.function_inputs))  # Convert to numpy array
+    output = numpy.sum(solution * function_inputs)
+    fitness = 1.0 / numpy.abs(output - self.desired_output)
+    return fitness
+```
+
+在这个函数中，我们首先将解乘以问题的输入，然后计算其和，这个和表示的是该解的预测输出。我们希望这个预测输出能够尽可能接近我们期望的输出，因此我们将预测输出与期望输出之间的绝对差值作为适应度函数。我们希望最小化这个差值，所以我们取其倒数作为适应度。
+
+### 2. 构建遗传算法模型
+
+在构建遗传算法模型时，我们需要设置一些参数，包括种群大小、基因数量、父母数量以及进化代数等。
+
+```python
+def build_model(self, function_inputs, desired_output, num_generations=100, num_parents_mating=7, sol_per_pop=50):
+    self.function_inputs = function_inputs
+    self.desired_output = desired_output
+
+    num_genes = len(function_inputs)
+
+    self.ga_instance = pygad.GA(num_generations=num_generations,
+                                num_parents_mating=num_parents_mating, 
+                                fitness_func=self.fitness_func,
+                                sol_per_pop=sol_per_pop, 
+                                num_genes=num_genes,
+                                on_generation=self.callback_generation)
+```
+
+### 3. 运行模型
+
+最后，我们可以运行模型并打印出每一代的最佳解和最佳适应度。运行结束后，我们可以获取最佳解以及对应的预测输出和适应度。
+
+```python
+def run(self):
+    self.ga_instance.run()
+    self.ga_instance.plot_fitness()
+    self.solution, self.solution_fitness, self.solution_idx = self.ga_instance.best_solution()
+```
+
+这就是我们如何使用遗传算法进行建模和解决这个问题的方法。
+
+## prompt
+
 ```
 Traceback (most recent call last):
   File "/mnt/e/suu/workplace/wuliu/test_algo.py", line 58, in <module>
@@ -123,7 +175,3 @@ loaded_ga_instance.plot_fitness()
 ---
 please give me the correct class GeneticAlgorithmModel, you can rewrite it totally
 ```
-
-q
-
-
