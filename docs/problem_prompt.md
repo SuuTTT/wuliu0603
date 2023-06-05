@@ -11,8 +11,8 @@
 ---
 报错信息 1~n
 ---
-搜索到信息
-newbing or browser的解决方案
+
+newbing or GPT4browser搜索整理的解决方案
 ---
 命令
 ```

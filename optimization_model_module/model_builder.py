@@ -65,7 +65,9 @@ class GurobiModel(OptimizationModel):
     def build_model(self, D, S, c):
         # 定义决策变量
         self.x = self.model.addVars(D.keys(), S.keys(), vtype=GRB.INTEGER, name="x")
-
+        print(f"D: {D}")
+        print(f"S: {S}")
+        print(f"c: {c}")
         # 设置目标函数: 最小化总运输成本
         self.model.setObjective(quicksum(c[i] * self.x[i, j] for i in D.keys() for j in S.keys()), GRB.MINIMIZE)
 

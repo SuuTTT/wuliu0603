@@ -54,8 +54,8 @@ def main():
     data_dict = read_data()
 
     # Test all model types
-    for model_type in ['GA','Gurobi', 'Pulp']:
-    #for model_type in ['Gurobi']:
+    #for model_type in ['GA','Gurobi', 'Pulp']:
+    for model_type in ['Gurobi']:
         build_and_solve_model(data_dict, model_type)
 
 if __name__ == "__main__":

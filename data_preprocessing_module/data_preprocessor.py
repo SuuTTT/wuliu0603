@@ -1,4 +1,35 @@
 from sklearn.preprocessing import MinMaxScaler
+# data_preprocessing_module/data_preprocessor.py
+
+#Spdd类用于表示单个订单。使用它将有助于更容易地进行数据管理和操作，例如根据不同的属性对订单进行排序或过滤。
+#定义了Spdd类之后，你可以在data_preprocessor.py文件中使用它将原始数据转换为Spdd对象的列表。然后，将这些预处理后的数据用作优化模型的输入。
+class Spdd:
+    def __init__(self, ddnm, qynm, spnm, sl, lg, zwdpwcsj):
+        self.ddnm = ddnm  # 订单内码
+        self.qynm = qynm  # 提交商品订单企业内码
+        self.spnm = spnm  # 商品内码
+        self.sl = sl  # 商品数量
+        self.lg = lg  # 量纲
+        self.zwdpwcsj = zwdpwcsj  # 最晚商品调配完成时间
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
+
+class DPTJ:
+    """
+    调配推荐类
+    """
+    def __init__(self, ckbh, yhbh, spsl):
+        """
+        初始化方法
+
+        :param ckbh: 仓库编号 (ChangKuBianHao)
+        :param yhbh: 用户编号 (YongHuBianHao)
+        :param spsl: 商品数量 (ShangPinShuLiang)
+        """
+        self.ckbh = ckbh
+        self.yhbh = yhbh
+        self.spsl = spsl
 
 class DataPreprocessor:
     def __init__(self):

@@ -23,4 +23,3 @@ pip download -r wuliu0603/requirements.txt -d ./my_dir
 ```bash
 pip install --no-index --find-links=./my_dir -r wuliu0603/requirements.txt
 ```
-
