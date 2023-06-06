@@ -4,9 +4,10 @@ import json
 
 # Sample data for testing
 data = [
-    {"ddnm": "order1", "qynm": "company1", "spnm": 0, "sl": 10, "lg": "pcs", "zwdpwcsj": "2023-06-06"},
-    {"ddnm": "order2", "qynm": "company2", "spnm": 0, "sl": 5, "lg": "pcs", "zwdpwcsj": "2023-06-07"}
+    {"ddnm": "order1", "qynm": "company1", "spnm": 1, "sl": 10, "lg": "pcs", "zwdpwcsj": "2023-06-06"},
+    {"ddnm": "order2", "qynm": "company2", "spnm": 2, "sl": 5, "lg": "pcs", "zwdpwcsj": "2023-06-07"}
 ]
+
 
 # Convert list to json
 data_json = json.dumps(data)
