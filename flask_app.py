@@ -18,7 +18,7 @@ def getZytpcl():
     
     results = {}
     #for model_type in ['GA','Gurobi', 'Pulp']:
-    for model_type in ['Pulp']:
+    for model_type in ['Gurobi']:
         result = process_order_data(spdd_list, model_type)
         converted_result = convert_result_to_dptj(model_type, result)
         results[model_type] = converted_result
@@ -98,8 +98,14 @@ def process_order_data(order_data, model_type):
         model_builder.build_model(D, S, c)
     solution = solver.solve_model()
 
-    print(f"Solution for {model_type}: ", solution)
-    return solution
+    filtered_solution = {}
+    for key, value in solution.items():
+        print(key,value)
+        if abs(value) > 0.00001:   # use abs to check if the absolute value is greater than a small threshold
+            filtered_solution[key] = int(value)
+    print(f"Solution for {model_type}: ", filtered_solution)
+    return filtered_solution
+
 
 
 if __name__ == "__main__":
