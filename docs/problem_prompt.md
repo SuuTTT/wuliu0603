@@ -390,7 +390,7 @@ def getZytpcl():
 
     data = request.get_json()
     spdd_list = [Spdd.from_dict(item) for item in data]
-    
+
     results = {}
     #for model_type in ['GA','Gurobi', 'Pulp']:
     for model_type in ['Pulp']:

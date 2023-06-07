@@ -52,7 +52,3 @@ $\min \sum_{i=1}^{m} \sum_{j=1}^{n} \sum_{k=1}^{p} c_{ijk} \cdot x_{ijk}$
    $x_{ijk} \in \mathbb{Z}^+, \forall i \in \{1, 2, \ldots, m\}, j \in \{1, 2, \ldots, n\}, k \in \{1, 2, \ldots, p\}$
 
 通过求解这个优化问题，我们可以得到最优的物流方案，即每种商品从哪个仓库运输到
-
-
-
-
