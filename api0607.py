@@ -1,6 +1,3 @@
-from flask import Flask, request, jsonify
-import operator
-
 # 我对数据格式的假设包括：
 
 # 1. **订单信息（`Spdd`）**：假设订单信息是一个包含字典的列表。每个字典代表一个订单，包含商品内码（`spnm`）和商品数量（`sl`）。这意味着每个订单只包含一种商品。如果一个订单可以包含多种商品，那么这个格式可能需要进行调整。
@@ -25,14 +22,33 @@ import operator
 
 # 6. **没有处理错误和异常**：在这个示例代码中，我没有处理可能出现的错误和异常，例如请求参数的格式错误、仓库库存不足等。在实际的代码中，应该添加适当的错误处理和异常处理代码，以确保接口的稳定性和可靠性。
 
+from typing import List, Dict
+from flask import Flask, request, jsonify
+import operator
+
+class Warehouse:
+    def __init__(self, cknm: str, pfwhnm: str, yscb: int):
+        self.cknm = cknm
+        self.pfwhnm = pfwhnm
+        self.yscb = yscb
+
+class Order:
+    def __init__(self, ddnm: str, qynm: str, spnm: str, sl: int, lg: str, zwdpwcsj: str, ckdata: List[Warehouse]):
+        self.ddnm = ddnm
+        self.qynm = qynm
+        self.spnm = spnm
+        self.sl = sl
+        self.lg = lg
+        self.zwdpwcsj = zwdpwcsj
+        self.ckdata = ckdata
+
+class RequestBody:
+    def __init__(self, Spdd: List[Order], spmzd: int, dpsx: str):
+        self.Spdd = Spdd
+        self.spmzd = spmzd
+        self.dpsx = dpsx
 
 app = Flask(__name__)
-
-# 模拟的仓库库存数据，实际情况中应从数据库或其他数据源获取
-warehouse_data = {
-    "warehouse1": {"apple": 100, "banana": 200},
-    "warehouse2": {"apple": 150, "banana": 250}
-}
 
 @app.route('/getZytpcl', methods=['POST'])
 def get_zytpcl():
@@ -51,33 +67,19 @@ def get_zytpcl():
     if dpsx not in ['FAR_FIRST', 'NEAR_FIRST']:
         return jsonify({"error": "Invalid dpsx"}), 400
 
-    # 计算订单需求量
-    orders = []
-    for order in spdd:
-        spnm = order.get('spnm')
-        sl = order.get('sl', 0)
-        demand = sl * spmzd // 100
-        orders.append((spnm, demand))
-
-    # 排序订单
-    if dpsx == 'FAR_FIRST':
-        orders.sort(key=operator.itemgetter(1), reverse=True)
-    else:
-        orders.sort(key=operator.itemgetter(1))
-
     # 调配算法
     results = []
-    for spnm, demand in orders:
-        for warehouse, inventory in warehouse_data.items():
-            if inventory.get(spnm, 0) >= demand:
-                inventory[spnm] -= demand
-                results.append({
-                    "cknm": warehouse,
-                    "qynm": "example_qynm",
-                    "spnm": spnm,
-                    "xqsj": "example_xqsj",
-                    "cb": demand * 10  # 假设调配成本为数量*10
-                })
+    for order in spdd:
+        for warehouse in order['ckdata']:
+            if warehouse['yscb'] <= order['sl']:
+                result = {
+                    "cknm": warehouse['cknm'],
+                    "qynm": order['qynm'],
+                    "spnm": order['spnm'],
+                    "xqsj": order['zwdpwcsj'],
+                    "cb": warehouse['yscb'] * order['sl']
+                }
+                results.append(result)
                 break
 
     # 返回结果
