@@ -63,10 +63,7 @@ VALUES (1, 1, 50),
        (2, 2, 60),
        (3, 3, 70),
        (4, 4, 80);
-
 ```
-
-
 
 Based on your provided test data, the objective is to determine the optimal transportation plan to meet the demands of various users from different warehouses while minimizing transportation costs. Here's an interpretation of the data:
 
@@ -87,5 +84,96 @@ Given these conditions, a simple solution that does not necessarily minimize cos
 This solution assumes that the warehouses are within the coverage range of the respective users and that the transportation options can deliver the required quantity of goods. The cost of this solution would be 4*60 = 240 units.
 
 However, to truly minimize cost, you would need to consider other factors such as the geographical distribution of the users and the warehouses, and whether it would be more cost-effective to use a single transportation option multiple times or to use different transportation options. The best solution would be obtained by running the optimization algorithm with this data.
+
+## stub api
+
+
+
+假设我们有3个订单和2个仓库，每个订单需要两种商品，每个仓库都有这两种商品。订单和仓库的详细信息如下：
+
+订单信息：
+
+- 订单1：需要商品A 5个，商品B 3个，最晚完成时间为10天。
+- 订单2：需要商品A 7个，商品B 2个，最晚完成时间为12天。
+- 订单3：需要商品A 6个，商品B 1个，最晚完成时间为8天。
+
+仓库信息：
+
+- 仓库1：有商品A 10个，商品B 6个，运输成本为2元/个。
+- 仓库2：有商品A 8个，商品B 6个，运输成本为1元/个。
+
+满足度要求为80%，即每个订单只需要满足80%的商品需求。
+
+我们首先可以确定每个订单的实际需求（即需要满足的数量）：订单1需要商品A 4个、商品B 2.4个，订单2需要商品A 5.6个、商品B 1.6个，订单3需要商品A 4.8个、商品B 0.8个。
+
+然后，我们可以建立一个混合整数规划模型，用来最小化总的运输成本：
+
+- 决策变量：$x_{ijn}$表示从仓库j向订单i配送商品n的数量。
+- 目标函数：最小化总的运输成本，即最小化$\sum_{i=1}^{3}\sum_{j=1}^{2}\sum_{n=A,B}c_{jn}x_{ijn}$。
+- 约束条件：
+  - 订单的需求必须得到满足：对于所有的i和n，有$\sum_{j=1}^{2}x_{ijn}\geq d_{in}$。
+  - 仓库不能配送超过其库存的商品数量：对于所有的j和n，有$\sum_{i=1}^{3}x_{ijn}\leq q_{jn}$。
+
+其中，$c_{jn}$表示仓库j配送商品n的成本，$d_{in}$表示订单i对商品n的实际需求，$q_{jn}$表示仓库j拥有商品n的数量。
+
+通过求解这个模型，我们可以得到每个仓库应该向每个订单配送哪些商品，以及配送的数量，从而达到最小化总的运输成本的目标。这就是最优的调配方案。
+
+为了求解这个模型，我们可能需要使用专门的优化求解器，如CPLEX、Gurobi或PuLP等。这些求解器都能很好地处理混合整数规划问题。
+
+```json
+data = {
+   "Spdd":[
+      {
+         "ddnm": "1",
+         "qynm": "123",
+         "spnm": "A",
+         "sl": 5,
+         "lg": "个",
+         "zwdpwcsj": "2023-06-30T00:00:00",
+         "jd": 39.913818,
+         "wd": 116.363625,
+         "ckdata": [
+            {
+               "cknm":"WH1",
+               "pfwhnm":"BOX1",
+               "yscb": 2.0
+            },
+            {
+               "cknm":"WH2",
+               "pfwhnm":"BOX2",
+               "yscb": 1.0
+            }
+         ]
+      },
+      {
+         "ddnm": "2",
+         "qynm": "456",
+         "spnm": "B",
+         "sl": 3,
+         "lg": "个",
+         "zwdpwcsj": "2023-06-30T00:00:00",
+         "jd": 39.913818,
+         "wd": 116.363625,
+         "ckdata": [
+            {
+               "cknm":"WH1",
+               "pfwhnm":"BOX1",
+               "yscb": 2.0
+            },
+            {
+               "cknm":"WH2",
+               "pfwhnm":"BOX2",
+               "yscb": 1.0
+            }
+         ]
+      }
+   ],
+   "spmzd": 0.8,
+   "dpsx": "先进先出"
+}
+
+```
+
+
 
 ## prompts
