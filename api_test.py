@@ -148,4 +148,8 @@ headers = {'Content-type': 'application/json'}
 
 response = requests.post(url, data=json.dumps(data), headers=headers)
 
-print(response.json())
+try:
+    print(response.json())
+except json.JSONDecodeError:
+    print("Empty response, no JSON to decode")
+
