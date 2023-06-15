@@ -9,7 +9,7 @@ data = {
       {
          "ddnm": "1",
          "qynm": "123",
-         "spnm": "A",
+         "spnm": "AUX",
          "sl": 5,
          "lg": "个",
          "zwdpwcsj": "2023-06-30T00:00:00",
@@ -31,7 +31,7 @@ data = {
       {
          "ddnm": "2",
          "qynm": "456",
-         "spnm": "B",
+         "spnm": "BUCKER",
          "sl": 3,
          "lg": "个",
          "zwdpwcsj": "2023-06-30T00:00:00",
@@ -143,7 +143,29 @@ data = {
    "dpsx": "先进先出"
 }
 
-
+given_data={
+	"spmzd":"95",
+	"Spdd":[
+		{
+			"ddnm":"01",
+			"qynm":"qynm1",
+			"zwdpwcsj":"2023-06-290T00:00:00",
+			"spnm":"01",
+			"sl":"230",
+			"lg":"个"
+		},
+		{
+			"ddnm":"02",
+			"qynm":"qynm2",
+			"zwdpwcsj":"2023-06-30T00:00:00",
+			"spnm":"02",
+			"sl":"130",
+			"lg":"个"
+		}
+	],
+	"dpsx":"调配顺序"
+}
+data=given_data
 headers = {'Content-type': 'application/json'}
 
 response = requests.post(url, data=json.dumps(data), headers=headers)
