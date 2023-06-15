@@ -165,7 +165,7 @@ given_data={
 	],
 	"dpsx":"调配顺序"
 }
-data=given_data
+#data=given_data
 headers = {'Content-type': 'application/json'}
 
 response = requests.post(url, data=json.dumps(data), headers=headers)
