@@ -63,11 +63,13 @@ def getZytpcl():
     for i in range(len(req["Spdd"])):
         prob += pulp.lpSum(x[i, j] for j in range(len(req["Spdd"][i]["ckdata"]))) >= req["Spdd"][i]["sl"] * req["spmzd"]
 
+    warehouse_stocks = []
     for i in range(len(req["Spdd"])):
         stocks = get_warehouse_stocks([req["Spdd"][i]])["data"]
-        for j in range(len(req["Spdd"][i]["ckdata"])):
-            warehouse_stocks = sum([wh['xyl'] for wh in stocks[0]['ckkcsjVOS'][0]['ckkcvos']])
-            prob += pulp.lpSum(x[k, j] for k in range(len(req["Spdd"]))) <= warehouse_stocks
+        warehouse_stocks.append(sum([wh['xyl'] for wh in stocks[0]['ckkcsjVOS'][0]['ckkcvos']]))
+
+    for j in range(len(req["Spdd"][0]["ckdata"])):
+        prob += pulp.lpSum(x[i, j] for i in range(len(req["Spdd"]))) <= warehouse_stocks[j]
 
     print(prob)
     prob.solve()
