@@ -49,81 +49,77 @@ def get_warehouse_stocks(orders):
 
 from datetime import datetime, timedelta
 
+def get_max_time():
+    # 定义开始时间和结束时间
+    start_time = datetime.now()
+    end_time = datetime.strptime("2023-06-30T00:00:00", "%Y-%m-%dT%H:%M:%S") + timedelta(hours=40)
+    
+    # 计算两者之间的小时数
+    max_time = int((end_time - start_time).total_seconds() // 3600)
+    
+    return max_time
+
+
 @app.route("/getZytpcl", methods=['POST'])
 def getZytpcl():
-    req = request.json
-    total_costs = []
-    warehouse_usage = {}  # 用来跟踪仓库的使用情况
+    req = request.json  # 获取请求中的 JSON 数据
 
-    warehouse_list = list(range(len(req["Spdd"][0]["ckdata"])))
+    # 获取订单并按最晚配送时间排序
+    Spdd = sorted(req["Spdd"], key=lambda x: x["zwdpwcsj"])
+    
+    results = []  # 创建一个空列表来保存结果
 
-    # shuffle the warehouse list to try different combinations
-    import random
-    random.shuffle(warehouse_list)
-
-    for i in range(len(req["Spdd"])):
-        for j in warehouse_list:
-            total_costs.append(get_total_costs(req["Spdd"][i], req["Spdd"][i]["ckdata"][j])["data"])
-
-            # 计算仓库的使用时间
-            zwdpwcsj = datetime.strptime(req["Spdd"][i]["zwdpwcsj"], '%Y-%m-%dT%H:%M:%S')  # 将字符串转换为 datetime 对象
-            total_time = timedelta(hours=total_costs[-1])  # 将总调配时间转换为 timedelta 对象
-            start_time = zwdpwcsj - total_time  # 这样就可以进行减法运算了
-            end_time = zwdpwcsj - timedelta(hours=req["Spdd"][i]["ckdata"][j]["yscb"])
-
-            if req["Spdd"][i]["ckdata"][j]['cknm'] in warehouse_usage:
-                conflict = False
-                for usage in warehouse_usage[req["Spdd"][i]["ckdata"][j]['cknm']]:
-                    if not (start_time >= usage[1] or end_time <= usage[0]):
-                        # 发生了冲突
-                        conflict = True
-                        break
-                if conflict:
-                    continue
-                else:
-                    warehouse_usage[req["Spdd"][i]["ckdata"][j]['cknm']].append((start_time, end_time))
-            else:
-                warehouse_usage[req["Spdd"][i]["ckdata"][j]['cknm']] = [(start_time, end_time)]
-
-
-    prob = pulp.LpProblem("Warehouse_Distribution_Problem", pulp.LpMinimize)
-    x = pulp.LpVariable.dicts("x", ((i, j) for i in range(len(req["Spdd"])) for j in range(len(req["Spdd"][i]["ckdata"]))), lowBound=0, cat='Integer')
-
-    prob += pulp.lpSum((req["Spdd"][i]["ckdata"][j]["yscb"] + total_costs[i]) * x[i, j] for i in range(len(req["Spdd"])) for j in range(len(req["Spdd"][i]["ckdata"])))
-
-    for i in range(len(req["Spdd"])):
-        prob += pulp.lpSum(x[i, j] for j in range(len(req["Spdd"][i]["ckdata"]))) >= req["Spdd"][i]["sl"] * req["spmzd"]
-
-    warehouse_stocks = []
-    for i in range(len(req["Spdd"])):
-        stocks = get_warehouse_stocks([req["Spdd"][i]])["data"]
-        warehouse_stocks.append(sum([wh['xyl'] for wh in stocks[0]['ckkcsjVOS'][0]['ckkcvos']]))
-
-    for j in range(len(req["Spdd"][0]["ckdata"])):
-        prob += pulp.lpSum(x[i, j] for i in range(len(req["Spdd"]))) <= warehouse_stocks[j]
-
-    print(prob)
-    prob.solve()
-
-    if pulp.LpStatus[prob.status] == 'Infeasible':
-        return jsonify({"code": -1, "data": {}, "message": "无推荐调配策略！"})
-
-    results = []
-    for i in range(len(req["Spdd"])):
-        for j in range(len(req["Spdd"][i]["ckdata"])):
-            if x[i, j].varValue > 0:
-                results.append({
-                    "cknm": req["Spdd"][i]["ckdata"][j]["cknm"],
-                    "qynm": req["Spdd"][i]["qynm"],
-                    "spnm": req["Spdd"][i]["spnm"],
-                    "sl": x[i, j].varValue,
-                    "lg": req["Spdd"][i]["lg"],
-                    "jd": req["Spdd"][i]["jd"],
-                    "wd": req["Spdd"][i]["wd"],
-                    "ddnm": req["Spdd"][i]["ddnm"]
+    for i in range(len(Spdd)):  # 对于每个订单
+        temp_order = Spdd[i].copy()  # 创建一个临时订单
+        # 获取仓库并按运输成本排序
+        ckdata = sorted(Spdd[i]["ckdata"], key=lambda x: x["yscb"])
+        for j in range(len(ckdata)):  # 对于每个仓库
+            # 获取仓库的库存
+            warehouse_stocks = get_warehouse_stocks([temp_order])
+            # 修改这里，增加商品编号（spnm）作为筛选条件
+            stock = [item for data in warehouse_stocks["data"] for item in data["ckkcsjVOS"][0]["ckkcvos"] if item["cknm"] == ckdata[j]["cknm"] and data["spnm"] == temp_order["spnm"]]
+            if not stock:
+                continue
+            stock = stock[0]
+            # 如果仓库的库存能满足订单需求
+            if stock["xyl"] >= temp_order["sl"]:
+                total_cost = get_total_costs(temp_order, ckdata[j])  # 调用函数获取运输成本
+                results.append({  # 添加一个新的结果
+                    "cknm": ckdata[j]["cknm"],
+                    "qynm": temp_order["qynm"],
+                    "spnm": temp_order["spnm"],
+                    "sl": temp_order["sl"],
+                    "lg": temp_order["lg"],
+                    "jd": temp_order["jd"],
+                    "wd": temp_order["wd"],
+                    "ddnm": temp_order["ddnm"],
+                    "xqsj": temp_order["zwdpwcsj"],  # 添加需求时间
+                    "cb": total_cost  # 添加成本
                 })
+                temp_order["sl"] = 0  # 清空临时订单的需求量
+                break
+            else:  # 如果仓库的库存不能满足全部订单需求，分配部分商品
+                total_cost = get_total_costs(temp_order, ckdata[j])  # 调用函数获取运输成本
+                results.append({
+                    "cknm": ckdata[j]["cknm"],
+                    "qynm": temp_order["qynm"],
+                    "spnm": temp_order["spnm"],
+                    "sl": stock["xyl"],  # 分配的数量为仓库的库存量
+                    "lg": temp_order["lg"],
+                    "jd": temp_order["jd"],
+                    "wd": temp_order["wd"],
+                    "ddnm": temp_order["ddnm"],
+                    "xqsj": temp_order["zwdpwcsj"],  # 添加需求时间
+                    "cb": total_cost  # 添加成本
+                })
+                temp_order["sl"] -= stock["xyl"]  # 从临时订单的需求量中减去已分配的数量
+        if temp_order["sl"] > 0:  # 如果临时订单的需求量还未满足，结束循环
+            break
+    else:  # 如果所有订单都能被满足，返回结果
+        return jsonify(results)
 
-    return jsonify(results)
+    # 如果有订单不能被满足，返回错误信息
+    return jsonify({"code": -1, "data": {}, "message": "无推荐调配策略！"})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080, debug=True)

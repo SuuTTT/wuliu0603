@@ -17,7 +17,7 @@ def mock_ckylcxByUTC():
         "code": 200, 
         "data": [
             {
-                "ckkcsjVOS": [
+                "ckkcsjVOS": [ # 仓库库存时间
                     {
                         "sjjd": "2023-06-30T00:00:00",  # 时间节点
                         "ckkcvos": [
@@ -32,7 +32,7 @@ def mock_ckylcxByUTC():
                         ]
                     }
                 ],
-                "spnm": "A"  # 商品内码
+                "spnm": "AUX"  # 商品内码
             },
             {
                 "ckkcsjVOS": [
@@ -41,7 +41,7 @@ def mock_ckylcxByUTC():
                         "ckkcvos": [
                             {
                                 "cknm": "WH1",  # 仓库内码
-                                "xyl": 6.0  # 现有量
+                                "xyl": 8.0  # 现有量
                             },
                             {
                                 "cknm": "WH2",  # 仓库内码

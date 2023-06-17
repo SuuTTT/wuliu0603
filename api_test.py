@@ -165,12 +165,11 @@ given_data={"Spdd":[
                "yscb": 1.0
             }
          ]
-      },
-	      {
+      },      {
          "ddnm": "6",
          "qynm": "678",
          "spnm": "B",
-         "sl": 7,
+         "sl": 14,
          "lg": "个",
          "zwdpwcsj": (datetime.fromisoformat("2023-06-30T00:00:00") + timedelta(hours=6)).isoformat(),
          "jd": 39.913818,
@@ -188,7 +187,8 @@ given_data={"Spdd":[
             }
          ]
       }
-   ],
+   
+	],
    "spmzd": 0.95,
    "dpsx": "先进先出"
 }
