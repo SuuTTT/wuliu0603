@@ -131,7 +131,7 @@ def getZytpcl():
 
 ---
 
-notes:
-getZytpcl
-
+补丁1
+goal：修改代码，改变`getZYtpcl中"cb": total_cost  # 添加成本` 的计算方法，这里的问题是，
+get_total_costs的返回值由` "sl": dingdan["sl"],  # 商品数量`控制的，当订单由于单个仓库库存不够被拆分后，其对应的成本应该重新通过调用get_total_costs获得
 
