@@ -6,34 +6,20 @@ from flask import Flask, request, jsonify
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-# 从坐标到仓库运输商品的总成本=出库时间十运输成本+提收成本（暂时不考虑）
-def get_total_costs(order,ckdata):
-    url = 'http://localhost:8000/sptp/queryYscb'
-    payload = {
-        "spnm": order["spnm"],
-        "cknm": ckdata["cknm"],
-        "jd": order["jd"],
-        "wd": order["wd"],
-        "sl": order["sl"],
-        "lg": order["lg"]
-    }
-    response = requests.post(url, json=payload)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Error in get_total_costs: {response.status_code}, {response.text}")
 
 
-def get_warehouse_stocks(orders):
-    print("in get_warehouse_stocks------------")
+
+# 获取仓库库存
+def get_warehouse_stocks(dingdan):
+    print("在获取仓库库存函数中------------")
     url = 'http://localhost:8000/sptp/ckylcxByUTC'
     
-    # 构建spxqxx列表
+    # 构建商品详情信息列表
     spxqxx = []
-    for order in orders:
+    for order in dingdan:
         spxqxx.append({
             "spnm": order["spnm"],
-            # if 'zwkssj' is not available, use 'zwdpwcsj'
+            # 如果'最晚开始时间'不存在，使用'最晚调配完成时间'
             "zwkssj": order.get("zwkssj", order["zwdpwcsj"])
         })
         
@@ -45,33 +31,37 @@ def get_warehouse_stocks(orders):
         print(response.json())
         return response.json()
     else:
-        raise Exception(f"Error in get_warehouse_stocks: {response.status_code}, {response.text}")
+        raise Exception(f"在获取仓库库存函数中出现错误: {response.status_code}, {response.text}")
 
-from datetime import datetime, timedelta
+# 获取从坐标到仓库运输商品的总成本=出库时间+运输成本+提收成本（暂时不考虑）
+def get_total_costs(dingdan,ckdata):
+    url = 'http://localhost:8000/sptp/queryYscb'
+    payload = {
+        "spnm": dingdan["spnm"],  # 商品内码
+        "cknm": ckdata["cknm"],  # 仓库内码
+        "jd": dingdan["jd"],  # 经度
+        "wd": dingdan["wd"],  # 纬度
+        "sl": dingdan["sl"],  # 商品数量
+        "lg": dingdan["lg"]  # 单位
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"在获取总成本函数中出现错误: {response.status_code}, {response.text}")
 
-def get_max_time():
-    # 定义开始时间和结束时间
-    start_time = datetime.now()
-    end_time = datetime.strptime("2023-06-30T00:00:00", "%Y-%m-%dT%H:%M:%S") + timedelta(hours=40)
-    
-    # 计算两者之间的小时数
-    max_time = int((end_time - start_time).total_seconds() // 3600)
-    
-    return max_time
-
-
-@app.route("/getZytpcl", methods=['POST'])
+@app.route("/getZytpcl", methods=['POST'])  # 获取主要调配策略
 def getZytpcl():
     req = request.json  # 获取请求中的 JSON 数据
 
-    # 获取订单并按最晚配送时间排序
+    # 获取商品订单并按最晚配送完成时间排序
     Spdd = sorted(req["Spdd"], key=lambda x: x["zwdpwcsj"])
     
     results = []  # 创建一个空列表来保存结果
 
     for i in range(len(Spdd)):  # 对于每个订单
         temp_order = Spdd[i].copy()  # 创建一个临时订单
-        # 获取仓库并按运输成本排序
+        # 获取仓库数据并按运输成本排序
         ckdata = sorted(Spdd[i]["ckdata"], key=lambda x: x["yscb"])
         for j in range(len(ckdata)):  # 对于每个仓库
             # 获取仓库的库存
@@ -83,36 +73,40 @@ def getZytpcl():
             stock = stock[0]
             # 如果仓库的库存能满足订单需求
             if stock["xyl"] >= temp_order["sl"]:
-                total_cost = get_total_costs(temp_order, ckdata[j])  # 调用函数获取运输成本
+                total_cost = get_total_costs(temp_order, ckdata[j])  # 调用函数获取运输总成本
                 results.append({  # 添加一个新的结果
-                    "cknm": ckdata[j]["cknm"],
-                    "qynm": temp_order["qynm"],
-                    "spnm": temp_order["spnm"],
-                    "sl": temp_order["sl"],
-                    "lg": temp_order["lg"],
-                    "jd": temp_order["jd"],
-                    "wd": temp_order["wd"],
-                    "ddnm": temp_order["ddnm"],
+                    "cknm": ckdata[j]["cknm"],  # 仓库内码
+                    "qynm": temp_order["qynm"],  # 提交订单的企业ID
+                    "spnm": temp_order["spnm"],  # 商品内码
+                    "sl": temp_order["sl"],  # 商品数量
+                    "lg": temp_order["lg"],  # 单位
+                    "jd": temp_order["jd"],  # 经度
+                    "wd": temp_order["wd"],  # 纬度
+                    "ddnm": temp_order["ddnm"],  # 订单内码
                     "xqsj": temp_order["zwdpwcsj"],  # 添加需求时间
                     "cb": total_cost  # 添加成本
                 })
                 temp_order["sl"] = 0  # 清空临时订单的需求量
                 break
+                # ...
             else:  # 如果仓库的库存不能满足全部订单需求，分配部分商品
-                total_cost = get_total_costs(temp_order, ckdata[j])  # 调用函数获取运输成本
+                temp_order["sl"] = stock["xyl"]  # 分配的数量为仓库的库存量
+                total_cost = get_total_costs(temp_order, ckdata[j])  # 重新调用函数获取运输总成本
                 results.append({
-                    "cknm": ckdata[j]["cknm"],
-                    "qynm": temp_order["qynm"],
-                    "spnm": temp_order["spnm"],
-                    "sl": stock["xyl"],  # 分配的数量为仓库的库存量
-                    "lg": temp_order["lg"],
-                    "jd": temp_order["jd"],
-                    "wd": temp_order["wd"],
-                    "ddnm": temp_order["ddnm"],
+                    "cknm": ckdata[j]["cknm"],  # 仓库内码
+                    "qynm": temp_order["qynm"],  # 提交订单的企业ID
+                    "spnm": temp_order["spnm"],  # 商品内码
+                    "sl": temp_order["sl"],  # 分配的数量为仓库的库存量
+                    "lg": temp_order["lg"],  # 单位
+                    "jd": temp_order["jd"],  # 经度
+                    "wd": temp_order["wd"],  # 纬度
+                    "ddnm": temp_order["ddnm"],  # 订单内码
                     "xqsj": temp_order["zwdpwcsj"],  # 添加需求时间
                     "cb": total_cost  # 添加成本
                 })
-                temp_order["sl"] -= stock["xyl"]  # 从临时订单的需求量中减去已分配的数量
+                temp_order["sl"] = Spdd[i]["sl"] - stock["xyl"]  # 从临时订单的需求量中减去已分配的数量
+            
+
         if temp_order["sl"] > 0:  # 如果临时订单的需求量还未满足，结束循环
             break
     else:  # 如果所有订单都能被满足，返回结果

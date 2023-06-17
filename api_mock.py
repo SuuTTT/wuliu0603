@@ -7,8 +7,11 @@ app = Flask(__name__)
 
 @app.route("/sptp/queryYscb", methods=['POST'])
 def mock_queryYscb():
-    # 这里返回模拟数据，模拟运输成本
-    return jsonify({"code": 200, "data": 36.0})
+    req = request.json  # 获取请求中的 JSON 数据
+    unit_cost = 3.0  # 模拟每件商品的运输成本
+    total_cost = unit_cost * req["sl"]  # 总的运输成本等于每件商品的运输成本乘以商品数量
+    return jsonify({"code": 200, "data": total_cost})  # 返回总的运输成本
+
 
 @app.route("/sptp/ckylcxByUTC", methods=['POST'])
 def mock_ckylcxByUTC():
